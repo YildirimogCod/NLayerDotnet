@@ -17,3 +17,5 @@ ScaffoldingReadMe.txt
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
+# Development settings (do not push to git)
+appsettings.Development.json
