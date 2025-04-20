@@ -1,0 +1,19 @@
+# .vs folder (Visual Studio cache and settings)
+.vs/
+
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
