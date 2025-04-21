@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using App.Repositories;
 using App.Repositories.Products;
+using Microsoft.EntityFrameworkCore;
 
 namespace App.Services.Products
 {
@@ -17,8 +18,25 @@ namespace App.Services.Products
                 Data = productsAsDto
             };
         }
+
+        public async Task<ServiceResult<List<ProductDto>>> GetAllList()
+        {
+            var products = await productRepository.GetAll().ToListAsync();
+            var productsAsDto = products.Select(p => new ProductDto(p.Id, p.Name, p.Price, p.Stock)).ToList();
+            return ServiceResult<List<ProductDto>>.Success(productsAsDto);
+        }
+
+        public async Task<ServiceResult<List<ProductDto>>> GetPagedAllListAsync(int pageNumber, int pageSize)
+        {
+            var products = await productRepository.GetAll().Skip((pageNumber - 1) * pageSize).Take(pageSize)
+                .ToListAsync();
+
+            var productsAsDto = products.Select(p => new ProductDto(p.Id, p.Name, p.Price, p.Stock)).ToList();
+            return ServiceResult<List<ProductDto>>.Success(productsAsDto);
+        }
+
         //Her seferinde ServiceResultları newlememek için factory static patterni uygulayacağız.
-        public async Task<ServiceResult<ProductDto>> GetProductById(int id)
+        public async Task<ServiceResult<ProductDto?>> GetProductById(int id)
         {
             var product = await productRepository.GetByIdAsync(id);
             if (product is null)
@@ -59,7 +77,7 @@ namespace App.Services.Products
 
             productRepository.Update(product);
             await unitOfWork.SaveChangesAsync();
-            return ServiceResult.Success();
+            return ServiceResult.Success(HttpStatusCode.NoContent);
         }
         public async Task<ServiceResult> DeleteProductAsync(int id)
         {
@@ -71,7 +89,7 @@ namespace App.Services.Products
 
             productRepository.Delete(product);
             await unitOfWork.SaveChangesAsync();
-            return ServiceResult.Success();
+            return ServiceResult.Success(HttpStatusCode.NoContent);
         }
 
     }

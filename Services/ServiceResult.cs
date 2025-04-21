@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json.Serialization;
 
 namespace App.Services
 {
@@ -6,8 +7,9 @@ namespace App.Services
     {
         public T? Data { get; set; }
         public List<string>? ErrorMessage { get; set; }
+        [JsonIgnore]
         public bool IsSuccess => ErrorMessage == null || ErrorMessage.Count == 0;
-
+        [JsonIgnore]
         public bool IsFailure => !IsSuccess;
 
         public HttpStatusCode Status { get; set; }
@@ -45,8 +47,9 @@ namespace App.Services
     {
      
         public List<string>? ErrorMessage { get; set; }
+        [JsonIgnore]
         public bool IsSuccess => ErrorMessage == null || ErrorMessage.Count == 0;
-
+        [JsonIgnore]
         public bool IsFailure => !IsSuccess;
 
         public HttpStatusCode Status { get; set; }
