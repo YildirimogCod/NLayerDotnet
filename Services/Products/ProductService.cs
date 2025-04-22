@@ -2,6 +2,7 @@
 using App.Repositories;
 using App.Repositories.Products;
 using App.Services.Products.Create;
+using App.Services.Products.Update;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,7 +14,7 @@ namespace App.Services.Products
         {
             var products = await productRepository.GetTopPriceProductsAsync(count);
 
-            var productsAsDto = products.Select(p => new ProductDto(p.Id, p.Name, p.Price, p.Stock)).ToList();
+            var productsAsDto = mapper.Map<List<ProductDto>>(products);
 
             return new ServiceResult<List<ProductDto>>()
             {
@@ -66,12 +67,19 @@ namespace App.Services.Products
             {
                 return ServiceResult<CreateProductResponse>.Fail("Ürün ismi veritabanında bulunmaktadır.");
             }
-            var product = new Product()
-            {
-                Name = request.Name,
-                Price = request.Price,
-                Stock = request.Stock
-            };
+
+            var product = mapper.Map<Product>(request);
+
+            #region manuel mapping
+
+            //var product = new Product()
+            //{
+            //    Name = request.Name,
+            //    Price = request.Price,
+            //    Stock = request.Stock
+            //};
+
+            #endregion
             await productRepository.AddAsync(product);
             await unitOfWork.SaveChangesAsync();
 
@@ -86,10 +94,14 @@ namespace App.Services.Products
                 return ServiceResult.Fail("Product Not Found", HttpStatusCode.NotFound);
             }
 
-            product.Name = request.Name;
-            product.Price = request.Price;
-            product.Stock = request.Stock;
 
+            var anyProduct = await productRepository.Where(x => x.Name == request.Name && x.Id!= product.Id).AnyAsync();
+            if (anyProduct)
+            {
+                return ServiceResult.Fail("Ürün ismi veritabanında bulunmaktadır.");
+            }
+
+            product = mapper.Map(request, product);
             productRepository.Update(product);
             await unitOfWork.SaveChangesAsync();
             return ServiceResult.Success(HttpStatusCode.NoContent);
